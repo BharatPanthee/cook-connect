@@ -11,7 +11,8 @@ import {
   getOrCreateChatRoom, 
   subscribeToMessages, 
   sendMessage, 
-  subscribeToUserChats 
+  subscribeToUserChats,
+  blockUser
 } from "./db-service.js";
 
 let activeChatId = null;
@@ -180,6 +181,32 @@ export function initChat(elements) {
     });
   }
 
+  const chatBlockUserBtn = document.getElementById("chat-block-user-btn");
+  if (chatBlockUserBtn) {
+    chatBlockUserBtn.addEventListener("click", async () => {
+      if (!currentUser || !activePartner) return;
+      
+      const partnerId = activePartner.uid || activePartner.id;
+      const confirmBlock = confirm(`Are you sure you want to block ${activePartner.name}? You will no longer see their messages or chat room.`);
+      if (!confirmBlock) return;
+      
+      try {
+        await blockUser(currentUser.uid, partnerId);
+        currentUser.blockedUsers = currentUser.blockedUsers || [];
+        if (!currentUser.blockedUsers.includes(partnerId)) {
+          currentUser.blockedUsers.push(partnerId);
+        }
+        
+        alert(`${activePartner.name} has been blocked.`);
+        chatModal.close();
+        handleAuthChange(currentUser);
+      } catch (err) {
+        console.error("Failed to block user:", err);
+        alert(`Failed to block user: ${err.message}`);
+      }
+    });
+  }
+
   if (elements.closeScheduleMeetBtn) {
     elements.closeScheduleMeetBtn.addEventListener("click", () => {
       scheduleMeetModal.close();
@@ -321,6 +348,10 @@ export function selectChatRoom(chatId, partner) {
   // Hide placeholder screen, display chat workspace panels
   document.getElementById("chat-status-wrapper").style.display = "flex";
   document.getElementById("chat-schedule-meet-btn").style.display = "inline-flex";
+  const chatBlockUserBtn = document.getElementById("chat-block-user-btn");
+  if (chatBlockUserBtn) {
+    chatBlockUserBtn.style.display = "inline-flex";
+  }
   document.getElementById("chat-suggestions").style.display = "flex";
   document.getElementById("chat-form").style.display = "flex";
   
@@ -414,13 +445,19 @@ function renderConversationsList(rooms) {
   const container = document.getElementById("active-conversations-list");
   if (!container) return;
   
-  if (rooms.length === 0) {
+  const blockedList = currentUser?.blockedUsers || [];
+  const activeRooms = rooms.filter(room => {
+    const partnerId = room.participants.find(p => p !== currentUser.uid);
+    return !blockedList.includes(partnerId);
+  });
+  
+  if (activeRooms.length === 0) {
     container.innerHTML = `<div class="empty-conversations-text">No active conversations. Contact a helper to begin messaging!</div>`;
     return;
   }
   
   container.innerHTML = "";
-  rooms.forEach(room => {
+  activeRooms.forEach(room => {
     const partnerId = room.participants.find(p => p !== currentUser.uid);
     const partnerName = room.participantNames[partnerId] || "Participant";
     
@@ -507,6 +544,10 @@ function closeActiveChatSession() {
   
   document.getElementById("chat-status-wrapper").style.display = "none";
   document.getElementById("chat-schedule-meet-btn").style.display = "none";
+  const chatBlockUserBtn = document.getElementById("chat-block-user-btn");
+  if (chatBlockUserBtn) {
+    chatBlockUserBtn.style.display = "none";
+  }
   document.getElementById("chat-suggestions").style.display = "none";
   document.getElementById("chat-form").style.display = "none";
   

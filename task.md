@@ -1,23 +1,23 @@
 # Production Readiness Tasks
 
-- [ ] **Firestore Security Rules Configuration**
-  - [ ] Create `firestore.rules` file in root directory
-  - [ ] Define access rules for `/users` and `/chefs` collections
-  - [ ] Define owner-only modification rules for `/recipes` and `/requests`
-  - [ ] Restrict `/chats` and sub-collection `/messages` access to participants only
-  - [ ] Configure write-only rule for `/reports` collection
-- [ ] **Secure Review Aggregations (Transactions)**
-  - [ ] Refactor `createReview` in `db-service.js` to use `runTransaction`
-  - [ ] Update average rating math on chef profiles safely within the transaction
-- [ ] **User Safety: Moderation Reporting**
-  - [ ] Add Report layout elements to index.html (chef card, recipe modal)
-  - [ ] Create `#report-modal` UI structure
-  - [ ] Add style rules for reporting states in style.css
-  - [ ] Wire report modal listeners and submit handlers in app.js
-- [ ] **User Safety: Chat Blocking**
-  - [ ] Add Block button next to active chat headers in index.html
-  - [ ] Implement `blockUser` profile array persistence in db-service.js
-  - [ ] Wire Block event handlers and sidebar filtering rules in app.js
+- [x] **Firestore Security Rules Configuration**
+  - [x] Create `firestore.rules` file in root directory
+  - [x] Define access rules for `/users` and `/chefs` collections
+  - [x] Define owner-only modification rules for `/recipes` and `/requests`
+  - [x] Restrict `/chats` and sub-collection `/messages` access to participants only
+  - [x] Configure write-only rule for `/reports` collection
+- [x] **Secure Review Aggregations (Transactions)**
+  - [x] Refactor `createReview` in `db-service.js` to use `runTransaction`
+  - [x] Update average rating math on chef profiles safely within the transaction
+- [x] **User Safety: Moderation Reporting**
+  - [x] Add Report layout elements to index.html (chef card, recipe modal)
+  - [x] Create `#report-modal` UI structure
+  - [x] Add style rules for reporting states in style.css
+  - [x] Wire report modal listeners and submit handlers in app.js
+- [x] **User Safety: Chat Blocking**
+  - [x] Add Block button next to active chat headers in index.html
+  - [x] Implement `blockUser` profile array persistence in db-service.js
+  - [x] Wire Block event handlers and sidebar filtering rules in app.js
 - [ ] **Verification & Handover**
   - [ ] Manually verify rule restrictions and transactions
   - [ ] Verify chat block hides room lists

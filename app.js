@@ -8,7 +8,10 @@ import {
   getRecipes,
   getUserProfile,
   toggleRecipeFavorite,
-  getReviews
+  getReviews,
+  reportContent,
+  blockUser,
+  unblockUser
 } from "./db-service.js";
 import { 
   addNewCook, 
@@ -54,6 +57,8 @@ let currentFilters = {
   showSavedOnly: false
 };
 let activeChef = null;
+let activeRecipe = null;
+let reportTarget = null;
 let savedRecipes = new Set();
 
 // DOM Elements
@@ -126,6 +131,11 @@ const closeRequestModalBtn = document.getElementById("close-request-modal");
 const closeRecipeModalBtn = document.getElementById("close-recipe-modal");
 const closeBecomeRecipeModalBtn = document.getElementById("close-become-recipe-modal");
 const closeAuthModalBtn = document.getElementById("close-auth-modal");
+const reportModal = document.getElementById("report-modal");
+const closeReportModalBtn = document.getElementById("close-report-modal");
+const reportContentForm = document.getElementById("report-content-form");
+const reportChefBtn = document.getElementById("report-chef-btn");
+const reportRecipeBtn = document.getElementById("report-recipe-btn");
 const tabSigninBtn = document.getElementById("tab-signin-btn");
 const tabRegisterBtn = document.getElementById("tab-register-btn");
 
@@ -405,6 +415,7 @@ function setupEventListeners() {
   closeRequestModalBtn.addEventListener("click", () => becomeRequestModal.close());
   closeRecipeModalBtn.addEventListener("click", () => recipeModal.close());
   closeBecomeRecipeModalBtn.addEventListener("click", () => becomeRecipeModal.close());
+  closeReportModalBtn.addEventListener("click", () => reportModal.close());
 
   // Become a Cook pricing rate logic toggler
   const rateTypeSelect = document.getElementById("cook-rate-type");
@@ -474,11 +485,74 @@ function setupEventListeners() {
       startChefChat(activeChef);
     }
   });
+
+  // Report button triggers
+  reportChefBtn.addEventListener("click", () => {
+    if (!currentUser) {
+      alert("Please sign in to report profiles.");
+      authModal.showModal();
+      return;
+    }
+    if (activeChef) {
+      reportTarget = {
+        id: activeChef.id || activeChef.userId,
+        type: "chef",
+        title: activeChef.name
+      };
+      chefModal.close();
+      reportModal.showModal();
+    }
+  });
+
+  reportRecipeBtn.addEventListener("click", () => {
+    if (!currentUser) {
+      alert("Please sign in to report recipes.");
+      authModal.showModal();
+      return;
+    }
+    if (activeRecipe) {
+      reportTarget = {
+        id: activeRecipe.id,
+        type: "recipe",
+        title: activeRecipe.title
+      };
+      recipeModal.close();
+      reportModal.showModal();
+    }
+  });
+
+  // Report Submission Form
+  reportContentForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentUser || !reportTarget) return;
+
+    const reason = document.getElementById("report-reason").value;
+    const details = document.getElementById("report-details").value.trim();
+
+    try {
+      await reportContent({
+        reporterId: currentUser.uid,
+        reporterName: currentUser.name || "User",
+        targetId: reportTarget.id,
+        targetType: reportTarget.type,
+        targetTitle: reportTarget.title,
+        reason,
+        details
+      });
+      alert("Thank you. Your report has been submitted to moderators for review.");
+      reportModal.close();
+      reportContentForm.reset();
+      reportTarget = null;
+    } catch (err) {
+      console.error("Failed to submit report:", err);
+      alert(`Error submitting report: ${err.message}`);
+    }
+  });
 }
 
 // Fallback Light Dismiss for browsers not fully supporting closedby="any"
 function setupModalDismissFallbacks() {
-  const dialogs = [chefModal, chatModal, becomeCookModal, becomeRequestModal, authModal, recipeModal, becomeRecipeModal];
+  const dialogs = [chefModal, chatModal, becomeCookModal, becomeRequestModal, authModal, recipeModal, becomeRecipeModal, reportModal];
   
   // Check if closedBy is natively supported
   if (!('closedBy' in HTMLDialogElement.prototype)) {
@@ -652,6 +726,7 @@ function callRenderRecipes() {
 // Recipe Detail Modal Populator
 function openRecipeDetails(recipe) {
   if (!recipe) return;
+  activeRecipe = recipe;
   
   document.getElementById("modal-recipe-image").textContent = recipe.emoji || "🍝";
   document.getElementById("recipe-modal-title").textContent = recipe.title;

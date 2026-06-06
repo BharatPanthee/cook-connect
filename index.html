@@ -300,6 +300,7 @@
             
             <button class="btn btn-primary w-full" id="modal-chef-chat-btn">Message / Book Chef</button>
             <p class="modal-chef-note">No pre-payment required. Connect directly to chat about details, allergy restrictions, and scheduling.</p>
+            <button class="btn btn-text report-btn w-full" id="report-chef-btn" style="margin-top: 1rem; color: var(--text-muted); font-size: 0.8rem; background: none; border: none; cursor: pointer; text-decoration: underline;">🚩 Report Profile</button>
           </div>
         </div>
       </div>
@@ -336,15 +337,20 @@
                 </span>
               </div>
             </div>
-            <button id="chat-schedule-meet-btn" class="btn btn-secondary chat-schedule-btn" style="margin-right: 2.2rem; display: none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: middle;">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              Google Meet
-            </button>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-right: 2.2rem;">
+              <button id="chat-schedule-meet-btn" class="btn btn-secondary chat-schedule-btn" style="display: none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: middle;">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                Google Meet
+              </button>
+              <button id="chat-block-user-btn" class="btn btn-danger" style="display: none; background: #dc3545; color: white; border: none; padding: 0.45rem 0.75rem; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; align-items: center;">
+                🚫 Block
+              </button>
+            </div>
           </header>
           
           <!-- Messages screen -->
@@ -705,6 +711,7 @@
             </div>
             <button class="btn btn-primary w-full" id="modal-recipe-book-btn">Learn to Make This Live</button>
             <p class="modal-chef-note" style="margin-top: 0.75rem;">Schedule a Google Meet session with this cook to learn this recipe step-by-step!</p>
+            <button class="btn btn-text report-btn w-full" id="report-recipe-btn" style="margin-top: 1rem; color: var(--text-muted); font-size: 0.8rem; background: none; border: none; cursor: pointer; text-decoration: underline;">🚩 Report Recipe</button>
           </div>
         </div>
       </div>
@@ -776,6 +783,41 @@
           </div>
 
           <button type="submit" class="btn btn-primary w-full">Share Recipe</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Report Content Dialog -->
+  <dialog id="report-modal" closedby="any" aria-labelledby="report-modal-title">
+    <div class="modal-wrapper">
+      <button class="modal-close" id="close-report-modal" aria-label="Close dialog">&times;</button>
+      <div class="auth-modal-wrapper" style="padding: 1.5rem 1rem;">
+        <h2 id="report-modal-title" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: #dc3545; justify-content: center;">
+          <span>🚩</span> Report Content
+        </h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; text-align: center;">
+          Help keep CookConnect safe. Please tell us why you are flagging this content.
+        </p>
+        
+        <form id="report-content-form" class="custom-form">
+          <div class="form-group">
+            <label for="report-reason" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">Reason *</label>
+            <select id="report-reason" required style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main);">
+              <option value="spam">Spam or Misleading</option>
+              <option value="harassment">Harassment or Abuse</option>
+              <option value="inappropriate">Inappropriate / Offensive Content</option>
+              <option value="scam">Scam or Fraudulent Activity</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group" style="margin-top: 1rem;">
+            <label for="report-details" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">Additional Details (Optional)</label>
+            <textarea id="report-details" rows="3" placeholder="Provide any details that can help our moderators review this report..." style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main); font-family: inherit; font-size: 0.85rem; resize: vertical;"></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-full" style="margin-top: 1.25rem; font-weight: 700; background-color: #dc3545; border-color: #dc3545; color: white;">Submit Report</button>
         </form>
       </div>
     </div>

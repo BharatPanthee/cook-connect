@@ -13,7 +13,8 @@ import {
   orderBy,
   onSnapshot,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 /**
@@ -204,22 +205,37 @@ export async function getReviews(chefId) {
 
 /**
  * Add a review and update the chef's average rating in the chefs collection.
+ * Uses a transaction to prevent concurrent updates from corrupting rating aggregates.
  */
 export async function createReview(reviewData) {
-  const docRef = await addDoc(collection(db, "reviews"), reviewData);
-  
-  // Recalculate average rating
-  const reviews = await getReviews(reviewData.chefId);
-  const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
-  const avgRating = parseFloat((totalRating / reviews.length).toFixed(1));
-  
-  // Save new aggregates to the chef listing
-  await setDoc(doc(db, "chefs", reviewData.chefId), {
-    rating: avgRating,
-    reviewsCount: reviews.length
-  }, { merge: true });
-  
-  return docRef;
+  const chefRef = doc(db, "chefs", reviewData.chefId);
+  const reviewsCollectionRef = collection(db, "reviews");
+  const newReviewRef = doc(reviewsCollectionRef);
+
+  await runTransaction(db, async (transaction) => {
+    const chefDoc = await transaction.get(chefRef);
+    if (!chefDoc.exists()) {
+      throw new Error("Chef profile does not exist.");
+    }
+
+    const chefInfo = chefDoc.data();
+    const currentRating = chefInfo.rating || 0;
+    const currentCount = chefInfo.reviewsCount || 0;
+
+    const newCount = currentCount + 1;
+    const newAverage = parseFloat(((currentRating * currentCount + reviewData.rating) / newCount).toFixed(1));
+
+    // Save the review record
+    transaction.set(newReviewRef, reviewData);
+
+    // Update the chef document rating aggregates
+    transaction.update(chefRef, {
+      rating: newAverage,
+      reviewsCount: newCount
+    });
+  });
+
+  return newReviewRef;
 }
 
 /**
@@ -236,4 +252,35 @@ export async function toggleRecipeFavorite(userId, recipeId, isFavorite) {
       savedRecipes: arrayRemove(recipeId)
     }, { merge: true });
   }
+}
+
+/**
+ * Submit a moderation report for flagged content.
+ */
+export async function reportContent(reportData) {
+  const reportsRef = collection(db, "reports");
+  return addDoc(reportsRef, {
+    ...reportData,
+    createdAt: new Date().toISOString()
+  });
+}
+
+/**
+ * Add a user ID to the current user's blocked list.
+ */
+export async function blockUser(userId, blockeeId) {
+  const userRef = doc(db, "users", userId);
+  await setDoc(userRef, {
+    blockedUsers: arrayUnion(blockeeId)
+  }, { merge: true });
+}
+
+/**
+ * Remove a user ID from the current user's blocked list.
+ */
+export async function unblockUser(userId, blockeeId) {
+  const userRef = doc(db, "users", userId);
+  await setDoc(userRef, {
+    blockedUsers: arrayRemove(blockeeId)
+  }, { merge: true });
 }

@@ -790,14 +790,14 @@ dialog {
   overflow: hidden;
 }
 
-/* Compact Modals Sizing */
 dialog:has(.auth-modal-wrapper),
 #auth-modal,
 #become-cook-modal,
 #become-request-modal,
 #become-recipe-modal,
 #payment-modal,
-#schedule-meet-modal {
+#schedule-meet-modal,
+#report-modal {
   max-width: 440px;
 }
 
