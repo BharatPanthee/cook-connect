@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CookConnect | P2P Local Culinary Match & Sharing</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=6">
+  <!-- Google Identity Services (GIS) for Google Calendar & Meet Integration -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- Global Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="#" class="logo" id="app-logo">
+        <span class="logo-icon">🍳</span>
+        <span class="logo-text">Cook<span>Connect</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#explore" class="nav-link active" data-tab="browse">Browse Helpers</a>
+        <a href="#requests" class="nav-link" data-tab="requests">Community Board</a>
+        <a href="#recipes" class="nav-link" data-tab="recipes">Recipe Swap</a>
+      </nav>
+      <div class="header-actions">
+        <button id="become-helper-btn" class="btn btn-secondary">Become a Cook</button>
+        <button id="auth-btn" class="btn btn-secondary">Sign In</button>
+        
+        <div id="user-profile-menu" class="user-profile-menu" style="display: none;">
+          <button id="profile-trigger" class="profile-trigger" aria-label="User profile menu">
+            <span id="user-avatar-badge" class="avatar-badge">👤</span>
+            <span id="user-name-badge" class="name-badge">Profile</span>
+          </button>
+          <div id="profile-dropdown" class="profile-dropdown">
+            <div class="dropdown-header">
+              <span id="dropdown-user-name">User Name</span>
+              <span id="dropdown-user-role" class="user-role-badge">Client</span>
+            </div>
+            <hr>
+            <button id="sign-out-btn" class="dropdown-item">Sign Out</button>
+          </div>
+        </div>
+
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+          <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="badge">P2P Culinary Community</span>
+      <h1>Connecting People Through the Joy of Cooking</h1>
+      <p>Find local culinary experts and passionate home cooks ready to help you bake, grill, prep, or teach—either as a free skill-share or as a paid booking.</p>
+      <div class="hero-ctas">
+        <a href="#explore" class="btn btn-primary">Find a Helper</a>
+        <button id="hero-become-helper" class="btn btn-glass">Offer Cooking Help</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Exploration Hub -->
+  <main class="explore-container" id="explore">
+    <!-- Filters Sidebar / Bar -->
+    <section class="filter-panel">
+      <div class="filter-group search-bar">
+        <label for="search-input" class="sr-only">Search</label>
+        <div class="input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Search by name, dish, or specialty...">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label for="specialty-filter">Specialty</label>
+        <select id="specialty-filter">
+          <option value="all">All Specialties</option>
+          <option value="Baking">Baking & Pastry</option>
+          <option value="Italian">Italian Cuisine</option>
+          <option value="Asian">Asian & Sushi</option>
+          <option value="Vegan">Vegan & Vegetarian</option>
+          <option value="Indian">Indian Spices</option>
+          <option value="MealPrep">Meal Prep & Healthy</option>
+        </select>
+      </div>
+
+      <!-- Temporarily hidden during the 100% free community launch phase -->
+      <div class="filter-group" style="display: none;">
+        <label>Cost Type</label>
+        <div class="toggle-buttons">
+          <button class="toggle-btn active" data-cost="all">All</button>
+          <button class="toggle-btn" data-cost="free">Free / Swap</button>
+          <button class="toggle-btn" data-cost="paid">Paid</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label for="rating-filter">Minimum Rating</label>
+        <select id="rating-filter">
+          <option value="0">Any Rating</option>
+          <option value="4.5">4.5+ ★ Superior</option>
+          <option value="4.0">4.0+ ★ High</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Dietary Restrictions</label>
+        <div class="dietary-checkboxes-grid">
+          <label class="diet-checkbox-label"><input type="checkbox" class="diet-filter" value="Vegan"> Vegan</label>
+          <label class="diet-checkbox-label"><input type="checkbox" class="diet-filter" value="Vegetarian"> Vegetarian</label>
+          <label class="diet-checkbox-label"><input type="checkbox" class="diet-filter" value="Gluten-Free"> Gluten-Free</label>
+          <label class="diet-checkbox-label"><input type="checkbox" class="diet-filter" value="Dairy-Free"> Dairy-Free</label>
+          <label class="diet-checkbox-label"><input type="checkbox" class="diet-filter" value="Nut-Free"> Nut-Free</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Panel -->
+    <div class="explore-results">
+      <div class="tabs-header">
+        <button class="tab-trigger active" id="tab-browse" data-target="browse-view">
+          👩‍🍳 Available Culinary Helpers
+          <span class="badge-count" id="chefs-count">0</span>
+        </button>
+        <button class="tab-trigger" id="tab-requests" data-target="requests-view">
+          📌 Community Help Requests
+          <span class="badge-count" id="requests-count">0</span>
+        </button>
+        <button class="tab-trigger" id="tab-recipes" data-target="recipes-view">
+          📖 Recipe Swap Library
+          <span class="badge-count" id="recipes-count">0</span>
+        </button>
+      </div>
+
+      <!-- Active Views -->
+      <section class="tab-content">
+        <!-- Browse Cooks View -->
+        <div class="tab-pane active" id="browse-view">
+          <div class="chefs-grid" id="chefs-grid">
+            <!-- Dynamically populated via app.js -->
+          </div>
+          <div class="empty-state" id="chefs-empty" style="display: none;">
+            <div class="empty-icon">🍳</div>
+            <h3>No culinary helpers match your filters</h3>
+            <p>Try resetting filters or adjusting search queries to find local cooks.</p>
+            <button class="btn btn-secondary" id="reset-chef-filters">Reset Filters</button>
+          </div>
+        </div>
+
+        <!-- Help Requests View -->
+        <div class="tab-pane" id="requests-view">
+          <div class="bulletin-header" style="justify-content: flex-end; margin-bottom: 1rem;">
+            <button class="btn btn-secondary btn-sm" id="post-request-btn">Post a Request</button>
+          </div>
+          <div class="requests-grid" id="requests-grid">
+            <!-- Dynamically populated via app.js -->
+          </div>
+          <div class="empty-state" id="requests-empty" style="display: none;">
+            <div class="empty-icon">📌</div>
+            <h3>No active help requests</h3>
+            <p>Everyone is well-fed! Check back later or create a cooking help request yourself.</p>
+          </div>
+        </div>
+
+        <!-- Recipe Library View -->
+        <div class="tab-pane" id="recipes-view">
+          <div class="bulletin-header" style="justify-content: flex-end; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button class="btn btn-secondary btn-sm" id="toggle-saved-recipes-btn" style="display: flex; align-items: center; gap: 0.35rem;">
+                <span>💖</span> Saved Recipes
+              </button>
+              <button class="btn btn-secondary btn-sm" id="post-recipe-btn">Share a Recipe</button>
+            </div>
+          </div>
+          <div class="chefs-grid" id="recipes-grid">
+            <!-- Dynamically populated via app.js -->
+          </div>
+          <div class="empty-state" id="recipes-empty" style="display: none;">
+            <div class="empty-icon">📖</div>
+            <h3>No recipes shared yet</h3>
+            <p>Be the first to share your culinary creation with the neighborhood!</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- MODALS SECTION -->
+
+  <!-- Chef Detail Dialog -->
+  <dialog id="chef-modal" closedby="any" aria-labelledby="chef-modal-title">
+    <div class="modal-wrapper">
+      <button class="modal-close" id="close-chef-modal" aria-label="Close dialog">&times;</button>
+      <div class="modal-body">
+        <div class="modal-sidebar-layout">
+          <!-- Main details -->
+          <div class="modal-main-info">
+            <div class="chef-header-detail">
+              <div class="chef-avatar-large" id="modal-chef-avatar">👩‍🍳</div>
+              <div>
+                <h2 id="chef-modal-title">Chef Name</h2>
+                <p class="chef-modal-tagline" id="modal-chef-tagline">Specialty Cook</p>
+                <div class="chef-rating" id="modal-chef-rating">★★★★★ 5.0</div>
+              </div>
+            </div>
+            
+            <div class="modal-section">
+              <h3>Biography & Experience</h3>
+              <p id="modal-chef-bio">Chef bio text goes here...</p>
+            </div>
+
+            <div class="modal-section">
+              <h3>Specialties</h3>
+              <div class="tags-container" id="modal-chef-specialties">
+                <!-- tags -->
+              </div>
+            </div>
+
+            <!-- Signature Dish Showcase -->
+            <div class="modal-section">
+              <h3>Signature Dish Portfolio</h3>
+              <div class="portfolio-container" id="modal-chef-portfolio">
+                <!-- Images dynamically rendered -->
+              </div>
+            </div>
+
+            <!-- Reviews and Ratings Section -->
+            <div class="modal-section" style="margin-top: 2rem;">
+              <h3>Client Reviews & Ratings</h3>
+              <div class="reviews-summary-card">
+                <div class="reviews-average-rating">
+                  <span class="average-score" id="modal-chef-avg-score">0.0</span>
+                  <span class="average-stars" id="modal-chef-avg-stars">☆☆☆☆☆</span>
+                  <span class="average-count" id="modal-chef-review-count">0 reviews</span>
+                </div>
+              </div>
+              
+              <!-- Review list -->
+              <div class="reviews-list-container" id="modal-chef-reviews-list">
+                <!-- Dynamically populated reviews -->
+              </div>
+
+              <!-- Write a review form -->
+              <form id="write-review-form" class="custom-form write-review-form" style="display: none; margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 0.5rem; font-weight: 700; font-size: 0.95rem;">Write a Review</h4>
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                  <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">Rating *</label>
+                  <div class="star-rating-input">
+                    <input type="radio" id="star5" name="review-rating" value="5" required><label for="star5" title="5 stars">★</label>
+                    <input type="radio" id="star4" name="review-rating" value="4"><label for="star4" title="4 stars">★</label>
+                    <input type="radio" id="star3" name="review-rating" value="3"><label for="star3" title="3 stars">★</label>
+                    <input type="radio" id="star2" name="review-rating" value="2"><label for="star2" title="2 stars">★</label>
+                    <input type="radio" id="star1" name="review-rating" value="1"><label for="star1" title="1 star">★</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="review-text" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">Your Review *</label>
+                  <textarea id="review-text" required rows="3" placeholder="Share your experience learning or cooking with this helper..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.45rem 1rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px;">Submit Review</button>
+              </form>
+              <p class="review-signin-notice" id="review-signin-notice" style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+                Please <a href="#" id="review-signin-link" style="color: var(--accent-color); font-weight: 600; text-decoration: none;">sign in</a> to write a review.
+              </p>
+            </div>
+          </div>
+
+          <!-- Action and pricing card -->
+          <div class="modal-action-card">
+            <!-- Temporarily hidden during the 100% free community launch phase -->
+            <div class="pricing-summary" style="display: none;">
+              <span class="price-label">Service Rate</span>
+              <span class="price-value" id="modal-chef-price">$25/hr</span>
+            </div>
+            <div class="profile-details-list">
+              <div class="detail-item">
+                <span class="item-label">Location:</span>
+                <span class="item-value" id="modal-chef-location">Local Area</span>
+              </div>
+              <div class="detail-item">
+                <span class="item-label">Availability:</span>
+                <span class="item-value" id="modal-chef-availability">Weekends & Evenings</span>
+              </div>
+              <div class="detail-item">
+                <span class="item-label">Service Area:</span>
+                <span class="item-value" id="modal-chef-type">In-person & Online</span>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary w-full" id="modal-chef-chat-btn">Message / Book Chef</button>
+            <p class="modal-chef-note">No pre-payment required. Connect directly to chat about details, allergy restrictions, and scheduling.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="chat-modal" closedby="any" aria-labelledby="chat-modal-title" style="max-width: 820px; width: calc(100% - 2rem); padding: 0;">
+    <div class="modal-wrapper chat-wrapper" style="max-height: 550px;">
+      <button class="modal-close" id="close-chat-modal" aria-label="Close dialog" style="top: 0.85rem; right: 0.85rem;">&times;</button>
+      
+      <div class="chat-layout-grid">
+        <!-- Sidebar: Active Conversations -->
+        <aside class="chat-sidebar">
+          <div class="sidebar-header">
+            <h3>Conversations</h3>
+          </div>
+          <div class="conversations-list" id="active-conversations-list">
+            <!-- Active chat rooms render here -->
+            <div class="empty-conversations-text">
+              No active conversations yet.
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main-area">
+          <header class="chat-header">
+            <div class="chat-chef-info">
+              <div class="chat-avatar" id="chat-avatar">💬</div>
+              <div>
+                <h2 id="chat-modal-title">Select a Conversation</h2>
+                <span class="status-indicator-wrapper" id="chat-status-wrapper" style="display: none;">
+                  <span class="status-indicator"></span> Online
+                </span>
+              </div>
+            </div>
+            <button id="chat-schedule-meet-btn" class="btn btn-secondary chat-schedule-btn" style="margin-right: 2.2rem; display: none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: middle;">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Google Meet
+            </button>
+          </header>
+          
+          <!-- Messages screen -->
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-placeholder-text">
+              Select a participant from the sidebar list or contact a cook to begin messaging!
+            </div>
+          </div>
+          
+          <!-- Chat suggestions -->
+          <div class="chat-suggestions" id="chat-suggestions" style="display: none;">
+            <button class="suggestion-chip">Let's schedule a free baking lesson next Saturday!</button>
+            <button class="suggestion-chip">Are you available for a paid weekly prep this Sunday?</button>
+            <button class="suggestion-chip">Do you teach vegetarian recipes for beginners?</button>
+          </div>
+
+          <!-- Messages Input -->
+          <form class="chat-input-form" id="chat-form" style="display: none;">
+            <input type="text" id="chat-input" placeholder="Type a message or click a suggestion..." autocomplete="off">
+            <button type="submit" class="btn btn-primary" id="chat-send-btn">Send</button>
+          </form>
+        </main>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Schedule Google Meet Dialog -->
+  <dialog id="schedule-meet-modal" closedby="any" aria-labelledby="schedule-meet-title">
+    <div class="modal-wrapper auth-modal-wrapper">
+      <button class="modal-close" id="close-schedule-meet-modal" aria-label="Close dialog">&times;</button>
+      <div class="auth-container">
+        <h2 id="schedule-meet-title">Schedule a Google Meet</h2>
+        <p class="auth-subtitle">Connect your Google Calendar to schedule and generate a real Google Meet video conference.</p>
+        
+        <!-- Google Calendar OAuth Panel -->
+        <div id="google-auth-card" class="google-auth-card">
+          <div class="google-auth-info">
+            <span class="google-auth-icon">📅</span>
+            <div class="google-auth-text">
+              <span id="google-status-text" class="google-status-unconnected">Google Calendar not connected</span>
+              <span id="google-status-subtext" class="google-status-subtext">Required to schedule a real Google Meet event</span>
+            </div>
+          </div>
+          <button type="button" id="google-auth-btn" class="btn btn-secondary btn-sm google-auth-btn-action">Connect</button>
+        </div>
+
+        <form id="schedule-meet-form" class="custom-form">
+          <div class="form-group">
+            <label for="meet-topic">Meeting Topic *</label>
+            <input type="text" id="meet-topic" placeholder="e.g. Sourdough Starters & Baking Prep" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="meet-date">Date *</label>
+              <input type="date" id="meet-date" required>
+            </div>
+            <div class="form-group">
+              <label for="meet-time">Time *</label>
+              <input type="time" id="meet-time" required>
+            </div>
+          </div>
+          
+          <button type="submit" id="schedule-meet-submit-btn" class="btn btn-primary w-full" style="margin-top: 0.5rem;" disabled>Schedule Real Meet</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Mock Stripe Payment Dialog -->
+  <dialog id="payment-modal" closedby="any" aria-labelledby="payment-title" style="padding: 0;">
+    <div class="modal-wrapper auth-modal-wrapper" style="max-height: 90vh;">
+      <button class="modal-close" id="close-payment-modal" aria-label="Close dialog">&times;</button>
+      <div class="auth-container">
+        <h2 id="payment-title" style="display: flex; align-items: center; gap: 0.5rem; justify-content: center;">
+          <span style="font-size: 1.25rem;">💳</span> Secure Booking Deposit
+        </h2>
+        <p class="auth-subtitle">Verify your payment card to authorize the booking. CookConnect holds funds in escrow until the lesson completes.</p>
+        
+        <div class="payment-amount-summary">
+          <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Escrow Booking Deposit</span>
+          <span style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary);" id="payment-amount-display">$0.00</span>
+        </div>
+
+        <form id="payment-form" class="custom-form">
+          <div class="form-group">
+            <label for="payment-card-name" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">Cardholder Name *</label>
+            <input type="text" id="payment-card-name" required placeholder="e.g. Maria Chen">
+          </div>
+          
+          <div class="form-group">
+            <label for="payment-card-number" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">Card Number *</label>
+            <div style="position: relative;">
+              <input type="text" id="payment-card-number" required placeholder="4242 4242 4242 4242" maxlength="19" pattern="\d{4}\s\d{4}\s\d{4}\s\d{4}">
+              <span id="card-type-icon" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem; pointer-events: none;">💳</span>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="payment-expiry" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">Expiration *</label>
+              <input type="text" id="payment-expiry" required placeholder="MM/YY" maxlength="5" pattern="\d{2}/\d{2}">
+            </div>
+            <div class="form-group">
+              <label for="payment-cvc" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">CVC / CVV *</label>
+              <input type="password" id="payment-cvc" required placeholder="123" maxlength="3" pattern="\d{3}">
+            </div>
+          </div>
+          
+          <button type="submit" id="payment-submit-btn" class="btn btn-primary w-full" style="margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 1rem;">
+            Authorize & Book Session
+          </button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Authentication Dialog (Sign In / Register) -->
+  <dialog id="auth-modal" closedby="any" aria-labelledby="auth-modal-title">
+    <div class="modal-wrapper auth-modal-wrapper">
+      <button class="modal-close" id="close-auth-modal" aria-label="Close dialog">&times;</button>
+      <div class="auth-container">
+        <!-- Auth tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tab-signin-btn" data-target="signin-pane">Sign In</button>
+          <button class="auth-tab-btn" id="tab-register-btn" data-target="register-pane">Create Account</button>
+        </div>
+
+        <!-- Sign In Pane -->
+        <div class="auth-pane active" id="signin-pane">
+          <h2 id="auth-modal-title">Welcome Back</h2>
+          <p class="auth-subtitle">Sign in to connect with local cooks and manage your profile.</p>
+          <form id="signin-form" class="custom-form">
+            <div class="form-group">
+              <label for="signin-email">Email Address *</label>
+              <input type="email" id="signin-email" name="email" autocomplete="username" required placeholder="e.g. maria@example.com">
+            </div>
+            <div class="form-group password-group">
+              <label for="signin-password">Password *</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="signin-password" name="password" autocomplete="current-password" required placeholder="••••••••" minlength="6">
+                <button type="button" class="toggle-password-btn" data-input="signin-password" aria-label="Show password">👁️</button>
+              </div>
+            </div>
+            <div id="signin-error" class="auth-error-message" style="display: none;"></div>
+            <button type="submit" class="btn btn-primary w-full">Sign In</button>
+          </form>
+        </div>
+
+        <!-- Register Pane -->
+        <div class="auth-pane" id="register-pane">
+          <h2>Join CookConnect</h2>
+          <p class="auth-subtitle">Share your culinary skills or find local helpers in your neighborhood.</p>
+          <form id="register-form" class="custom-form">
+            <div class="form-group">
+              <label for="register-name">Full Name *</label>
+              <input type="text" id="register-name" name="name" autocomplete="name" required placeholder="e.g. Maria Chen" minlength="2">
+            </div>
+            <div class="form-group">
+              <label for="register-email">Email Address *</label>
+              <input type="email" id="register-email" name="email" autocomplete="username" required placeholder="e.g. maria@example.com">
+            </div>
+            <div class="form-row">
+              <div class="form-group password-group">
+                <label for="register-password">Password *</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="register-password" name="password" autocomplete="new-password" required placeholder="Min 6 characters" minlength="6">
+                  <button type="button" class="toggle-password-btn" data-input="register-password" aria-label="Show password">👁️</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="register-role">I want to... *</label>
+                <select id="register-role" name="role" required>
+                  <option value="client">Find a Helper / Hire Cooks</option>
+                  <option value="cook">Become a Cook / Share Skills</option>
+                </select>
+              </div>
+            </div>
+            <div id="register-error" class="auth-error-message" style="display: none;"></div>
+            <button type="submit" class="btn btn-primary w-full">Create Account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Become a Helper Form Dialog -->
+  <dialog id="become-cook-modal" closedby="any" aria-labelledby="become-cook-title">
+    <div class="modal-wrapper">
+      <button class="modal-close" id="close-become-modal" aria-label="Close dialog">&times;</button>
+      <div class="become-cook-container">
+        <h2 id="become-cook-title">Share Your Cooking Skills</h2>
+        <p>Offer your culinary experience to your neighborhood. Set your rate (or offer help for free) and connect with locals.</p>
+        
+        <form id="become-cook-form" class="custom-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cook-name">Full Name *</label>
+              <input type="text" id="cook-name" required placeholder="e.g. Maria Chen" minlength="2">
+            </div>
+            <div class="form-group">
+              <label for="cook-specialty">Core Specialty Category *</label>
+              <select id="cook-specialty" required>
+                <option value="" disabled selected>Select a main specialty...</option>
+                <option value="Baking">Baking & Pastry</option>
+                <option value="Italian">Italian Cuisine</option>
+                <option value="Asian">Asian & Sushi</option>
+                <option value="Vegan">Vegan & Vegetarian</option>
+                <option value="Indian">Indian Spices</option>
+                <option value="MealPrep">Meal Prep & Healthy</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Temporarily hidden during the initial 100% free community launch phase -->
+          <div class="form-row" style="display: none;">
+            <div class="form-group">
+              <label for="cook-rate-type">Pricing Structure *</label>
+              <select id="cook-rate-type" required>
+                <option value="free" selected>Free / Skills Swap (Community Volunteering)</option>
+                <option value="paid">Paid Cooking Assistance</option>
+              </select>
+            </div>
+            <div class="form-group" id="cook-rate-container" style="display: none;">
+              <label for="cook-rate">Hourly Rate ($) *</label>
+              <input type="number" id="cook-rate" min="0" placeholder="e.g. 25" value="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cook-tagline">Brief Tagline (One sentence summary) *</label>
+            <input type="text" id="cook-tagline" required placeholder="e.g. Passionate about sourdough baking and French pastries" max-length="80">
+          </div>
+
+          <div class="form-group">
+            <label for="cook-bio">About Me & Culinary Background *</label>
+            <textarea id="cook-bio" required rows="4" placeholder="Share your experience, culinary training, what kind of help you provide, allergy considerations, and dishes you specialize in."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cook-location">Neighborhood / Area *</label>
+              <input type="text" id="cook-location" required placeholder="e.g. Brooklyn, NY">
+            </div>
+            <div class="form-group">
+              <label for="cook-avatar-emoji">Profile Emoji Profile Icon *</label>
+              <select id="cook-avatar-emoji">
+                <option value="👩‍🍳">👩‍🍳 Female Chef</option>
+                <option value="👨‍🍳">👨‍🍳 Male Chef</option>
+                <option value="🧑‍🍳">🧑‍🍳 Chef</option>
+                <option value="🍕">🍕 Pizza Lover</option>
+                <option value="🥐">🥐 Baker</option>
+                <option value="🍣">🍣 Sushi Master</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Create Listing</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Post a Help Request Form Dialog -->
+  <dialog id="become-request-modal" closedby="any" aria-labelledby="become-request-title">
+    <div class="modal-wrapper">
+      <button class="modal-close" id="close-request-modal" aria-label="Close dialog">&times;</button>
+      <div class="become-cook-container">
+        <h2 id="become-request-title">Request Cooking Assistance</h2>
+        <p>Post a request to the community board to get help preparing meals, learning a recipe, or planning cooking for events.</p>
+        
+        <form id="post-request-form" class="custom-form">
+          <div class="form-group">
+            <label for="req-title">What do you need help with? *</label>
+            <input type="text" id="req-title" required placeholder="e.g. Need help baking my first sourdough loaf" minlength="5">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="req-name">Your Name *</label>
+              <input type="text" id="req-name" required placeholder="e.g. Alex Rivera">
+            </div>
+            <div class="form-group">
+              <label for="req-budget">Compensation Offered *</label>
+              <select id="req-budget" required>
+                <option value="Free / Skill Swap">Free / Skill Swap (Community)</option>
+                <option value="Paid Helper">Paid Helper (Negotiable Rate)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="req-desc">Detailed Description of Help Needed *</label>
+            <textarea id="req-desc" required rows="4" placeholder="Detail the recipe, dates, if you have ingredients/equipment, and if you prefer online video support or in-person cooking."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="req-location">Neighborhood / Area *</label>
+              <input type="text" id="req-location" required placeholder="e.g. Manhattan, NY">
+            </div>
+            <div class="form-group">
+              <label for="req-specialty">Culinary Category *</label>
+              <select id="req-specialty" required>
+                <option value="Baking">Baking</option>
+                <option value="Italian">Italian Cuisine</option>
+                <option value="Asian">Asian & Sushi</option>
+                <option value="Vegan">Vegan & Vegetarian</option>
+                <option value="Indian">Indian Cuisine</option>
+                <option value="MealPrep">Meal Prep & General</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Post Request</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Recipe Detail Dialog -->
+  <dialog id="recipe-modal" closedby="any" aria-labelledby="recipe-modal-title">
+    <div class="modal-wrapper">
+      <button class="modal-close" id="close-recipe-modal" aria-label="Close dialog">&times;</button>
+      <div class="modal-body">
+        <div class="modal-sidebar-layout">
+          <!-- Main details -->
+          <div class="modal-main-info">
+            <div class="chef-header-detail">
+              <div class="chef-avatar-large" id="modal-recipe-image" style="background: var(--bg-primary); box-shadow: none;">🍝</div>
+              <div>
+                <h2 id="recipe-modal-title">Recipe Title</h2>
+                <p class="chef-modal-tagline" id="modal-recipe-author">by Chef Author</p>
+                <div class="chef-rating" id="modal-recipe-meta" style="color: var(--text-muted);">⏱ 30 mins | 👥 4 servings</div>
+              </div>
+            </div>
+            
+            <div class="modal-section">
+              <h3>Ingredients</h3>
+              <ul id="modal-recipe-ingredients" style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                <!-- list of ingredients -->
+              </ul>
+            </div>
+
+            <div class="modal-section">
+              <h3>Instructions</h3>
+              <ol id="modal-recipe-instructions" style="padding-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- list of instructions -->
+              </ol>
+            </div>
+          </div>
+
+          <!-- Action and pricing card -->
+          <div class="modal-action-card">
+            <div class="pricing-summary" style="margin-bottom: 1rem;">
+              <span class="price-label" style="font-size: 0.85rem;">Shared by Cook</span>
+              <span class="price-value" id="modal-recipe-author-name" style="font-size: 1.25rem;">Chef Name</span>
+            </div>
+            <button class="btn btn-primary w-full" id="modal-recipe-book-btn">Learn to Make This Live</button>
+            <p class="modal-chef-note" style="margin-top: 0.75rem;">Schedule a Google Meet session with this cook to learn this recipe step-by-step!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Share a Recipe Dialog -->
+  <dialog id="become-recipe-modal" closedby="any" aria-labelledby="become-recipe-title">
+    <div class="modal-wrapper">
+      <button class="modal-close" id="close-become-recipe-modal" aria-label="Close dialog">&times;</button>
+      <div class="become-cook-container">
+        <h2 id="become-recipe-title">Share Your Signature Recipe</h2>
+        <p>Post a recipe to the community library. Share ingredients, steps, and invite others to book a lesson with you.</p>
+        
+        <form id="post-recipe-form" class="custom-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="recipe-title">Recipe Name *</label>
+              <input type="text" id="recipe-title" required placeholder="e.g. Grandma's Sourdough Bread" minlength="3">
+            </div>
+            <div class="form-group">
+              <label for="recipe-category">Category *</label>
+              <select id="recipe-category" required>
+                <option value="" disabled selected>Select category...</option>
+                <option value="Baking">Baking & Pastry</option>
+                <option value="Italian">Italian Cuisine</option>
+                <option value="Asian">Asian & Sushi</option>
+                <option value="Vegan">Vegan & Vegetarian</option>
+                <option value="Indian">Indian Spices</option>
+                <option value="MealPrep">Meal Prep & Healthy</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="recipe-cook-time">Prep/Cook Time (e.g. 45 mins) *</label>
+              <input type="text" id="recipe-cook-time" required placeholder="e.g. 45 mins">
+            </div>
+            <div class="form-group">
+              <label for="recipe-servings">Servings (e.g. 4) *</label>
+              <input type="number" id="recipe-servings" min="1" value="4" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="recipe-emoji">Recipe Emoji (Icon) *</label>
+            <select id="recipe-emoji" required>
+              <option value="🍞">🍞 Bread</option>
+              <option value="🍕">🍕 Pizza</option>
+              <option value="🍝">🍝 Pasta</option>
+              <option value="🍣">🍣 Sushi</option>
+              <option value="🥗">🥗 Salad</option>
+              <option value="🍛">🍛 Curry</option>
+              <option value="🧁">🧁 Cupcake</option>
+              <option value="🥘">🥘 Paella/Stew</option>
+              <option value="🥩">🥩 Steak</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="recipe-ingredients">Ingredients (One per line) *</label>
+            <textarea id="recipe-ingredients" required rows="4" placeholder="3 cups all-purpose flour&#10;1 tsp salt&#10;1 cup warm water&#10;2 tsp active dry yeast"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="recipe-instructions">Instructions (One step per line) *</label>
+            <textarea id="recipe-instructions" required rows="5" placeholder="In a large bowl, dissolve yeast in warm water.&#10;Stir in flour and salt until dough forms.&#10;Knead on a floured surface for 10 minutes.&#10;Let rise for 1 hour, then bake at 375°F for 30 minutes."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Share Recipe</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>&copy; 2026 CookConnect. Empowering local communities through shared meals, skills, and cooking assistance.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Community Guidelines</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
