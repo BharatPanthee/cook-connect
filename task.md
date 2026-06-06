@@ -1,0 +1,23 @@
+# Production Readiness Tasks
+
+- [ ] **Firestore Security Rules Configuration**
+  - [ ] Create `firestore.rules` file in root directory
+  - [ ] Define access rules for `/users` and `/chefs` collections
+  - [ ] Define owner-only modification rules for `/recipes` and `/requests`
+  - [ ] Restrict `/chats` and sub-collection `/messages` access to participants only
+  - [ ] Configure write-only rule for `/reports` collection
+- [ ] **Secure Review Aggregations (Transactions)**
+  - [ ] Refactor `createReview` in `db-service.js` to use `runTransaction`
+  - [ ] Update average rating math on chef profiles safely within the transaction
+- [ ] **User Safety: Moderation Reporting**
+  - [ ] Add Report layout elements to index.html (chef card, recipe modal)
+  - [ ] Create `#report-modal` UI structure
+  - [ ] Add style rules for reporting states in style.css
+  - [ ] Wire report modal listeners and submit handlers in app.js
+- [ ] **User Safety: Chat Blocking**
+  - [ ] Add Block button next to active chat headers in index.html
+  - [ ] Implement `blockUser` profile array persistence in db-service.js
+  - [ ] Wire Block event handlers and sidebar filtering rules in app.js
+- [ ] **Verification & Handover**
+  - [ ] Manually verify rule restrictions and transactions
+  - [ ] Verify chat block hides room lists
