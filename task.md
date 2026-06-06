@@ -18,6 +18,6 @@
   - [x] Add Block button next to active chat headers in index.html
   - [x] Implement `blockUser` profile array persistence in db-service.js
   - [x] Wire Block event handlers and sidebar filtering rules in app.js
-- [ ] **Verification & Handover**
-  - [ ] Manually verify rule restrictions and transactions
-  - [ ] Verify chat block hides room lists
+- [x] **Verification & Handover**
+  - [x] Manually verify rule restrictions and transactions
+  - [x] Verify chat block hides room lists
